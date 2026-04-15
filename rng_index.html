@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Barra RNG</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --accent: #111827;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .card {
+      width: min(100%, 460px);
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 22px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.7rem;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input, select, button, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .result {
+      margin: 18px 0 10px;
+      padding: 18px;
+      border-radius: 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .number {
+      font-size: 3.4rem;
+      font-weight: 700;
+      line-height: 1.1;
+      word-break: break-word;
+    }
+
+    .meta {
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.45;
+      text-align: left;
+      white-space: pre-line;
+    }
+
+    .tiny {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Barra RNG</h1>
+    <div class="sub">A small personal number tool with transparent generation rules.</div>
+
+    <div class="row">
+      <div>
+        <label for="mode">Mode</label>
+        <select id="mode">
+          <option value="clockMod2">Clock mod 2</option>
+          <option value="clockRange">Clock to range</option>
+          <option value="lcg">LCG (deterministic state)</option>
+        </select>
+      </div>
+      <div>
+        <label for="digits">Show explanation</label>
+        <select id="showMeta">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="rangeFields" class="row">
+      <div>
+        <label for="min">Min</label>
+        <input id="min" type="number" value="0">
+      </div>
+      <div>
+        <label for="max">Max</label>
+        <input id="max" type="number" value="1">
+      </div>
+    </div>
+
+    <div id="lcgFields" class="hidden">
+      <label for="seed">Seed (integer)</label>
+      <input id="seed" type="number" value="123456789">
+
+      <div class="row" style="margin-top:12px;">
+        <div>
+          <label for="a">a</label>
+          <input id="a" type="number" value="1664525">
+        </div>
+        <div>
+          <label for="c">c</label>
+          <input id="c" type="number" value="1013904223">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="m">m</label>
+          <input id="m" type="number" value="4294967296">
+        </div>
+        <div>
+          <label for="lcgRangeMax">Map output to 0..N</label>
+          <input id="lcgRangeMax" type="number" value="1">
+        </div>
+      </div>
+
+      <div class="tiny">Each tap updates the stored state by xₙ₊₁ = (a·xₙ + c) mod m.</div>
+    </div>
+
+    <button id="generateBtn">Generate</button>
+
+    <div class="result">
+      <div id="number" class="number">—</div>
+      <div id="meta" class="meta"></div>
+    </div>
+
+    <div class="tiny">
+      For the LCG mode, state is stored locally in your browser on this device. No external randomness API is used anywhere in this file.
+    </div>
+  </main>
+
+  <script>
+    const modeEl = document.getElementById('mode');
+    const rangeFieldsEl = document.getElementById('rangeFields');
+    const lcgFieldsEl = document.getElementById('lcgFields');
+    const generateBtn = document.getElementById('generateBtn');
+    const numberEl = document.getElementById('number');
+    const metaEl = document.getElementById('meta');
+    const showMetaEl = document.getElementById('showMeta');
+
+    function updateVisibleFields() {
+      const mode = modeEl.value;
+      const isLCG = mode === 'lcg';
+      rangeFieldsEl.classList.toggle('hidden', isLCG);
+      lcgFieldsEl.classList.toggle('hidden', !isLCG);
+
+      if (mode === 'clockMod2') {
+        document.getElementById('min').value = 0;
+        document.getElementById('max').value = 1;
+      }
+    }
+
+    function showResult(value, explanation) {
+      numberEl.textContent = String(value);
+      metaEl.textContent = showMetaEl.value === 'yes' ? explanation : '';
+    }
+
+    function parseSafeInt(id, fallback) {
+      const n = Number(document.getElementById(id).value);
+      return Number.isFinite(n) ? Math.trunc(n) : fallback;
+    }
+
+    function nowMillis() {
+      return Date.now();
+    }
+
+    function clockMod2() {
+      const t = nowMillis();
+      const value = ((t % 2) + 2) % 2;
+      const explanation =
+        `Rule: output = currentUnixMilliseconds mod 2\n` +
+        `Current milliseconds since 1970: ${t}\n` +
+        `Computed value: ${t} mod 2 = ${value}`;
+      return { value, explanation };
+    }
+
+    function clockRange() {
+      let min = parseSafeInt('min', 0);
+      let max = parseSafeInt('max', 9);
+      if (min > max) [min, max] = [max, min];
+
+      const t = nowMillis();
+      const span = max - min + 1;
+      const mapped = min + (((t % span) + span) % span);
+      const explanation =
+        `Rule: output = min + (currentUnixMilliseconds mod span)\n` +
+        `Current milliseconds since 1970: ${t}\n` +
+        `Range: ${min}..${max}, so span = ${span}\n` +
+        `Computed value: ${min} + (${t} mod ${span}) = ${mapped}`;
+      return { value: mapped, explanation };
+    }
+
+    function getStoredState(seed, m) {
+      const raw = localStorage.getItem('barra_rng_lcg_state');
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed)) {
+        return Math.trunc(parsed);
+      }
+      const start = ((seed % m) + m) % m;
+      localStorage.setItem('barra_rng_lcg_state', String(start));
+      return start;
+    }
+
+    function lcgStep() {
+      const seed = parseSafeInt('seed', 123456789);
+      const a = parseSafeInt('a', 1664525);
+      const c = parseSafeInt('c', 1013904223);
+      let m = parseSafeInt('m', 4294967296);
+      let rangeMax = parseSafeInt('lcgRangeMax', 1);
+
+      if (m <= 0) m = 4294967296;
+      if (rangeMax < 0) rangeMax = 1;
+
+      const oldState = getStoredState(seed, m);
+      const newState = ((a * oldState + c) % m + m) % m;
+      localStorage.setItem('barra_rng_lcg_state', String(newState));
+
+      const mapped = newState % (rangeMax + 1);
+      const explanation =
+        `Rule: x_next = (a*x + c) mod m, then output = x_next mod (N+1)\n` +
+        `Old state x: ${oldState}\n` +
+        `Parameters: a=${a}, c=${c}, m=${m}, N=${rangeMax}\n` +
+        `New state: (${a}*${oldState} + ${c}) mod ${m} = ${newState}\n` +
+        `Output: ${newState} mod ${rangeMax + 1} = ${mapped}`;
+      return { value: mapped, explanation };
+    }
+
+    function generate() {
+      const mode = modeEl.value;
+      let result;
+
+      if (mode === 'clockMod2') {
+        result = clockMod2();
+      } else if (mode === 'clockRange') {
+        result = clockRange();
+      } else {
+        result = lcgStep();
+      }
+
+      showResult(result.value, result.explanation);
+    }
+
+    modeEl.addEventListener('change', updateVisibleFields);
+    generateBtn.addEventListener('click', generate);
+
+    updateVisibleFields();
+  </script>
+</body>
+</html>
