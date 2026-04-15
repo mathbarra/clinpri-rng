@@ -300,7 +300,8 @@
       } else {
         numberEl.textContent = String(value);
       }
-      metaEl.textContent = showMetaEl.value === 'yes' ? explanation : '';
+      metaEl.textContent =
+  detailsToggleEl.checked && showMetaEl.value === 'yes' ? explanation : '';
     }
 
     function parseSafeInt(id, fallback) {
