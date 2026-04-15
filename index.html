@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Barra RNG</title>
+  <title>Q-sortering randomiserer</title>
   <style>
     :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #d1d5db;
-      --accent: #111827;
-    }
+  --bg: #eef4fb;
+  --card: #ffffff;
+  --text: #0B2466;
+  --muted: #546692;
+  --line: #B4C7E3;
+  --accent: #0B2466;
+  --soft-blue: #8AA8D4;
+}
 
     * { box-sizing: border-box; }
 
@@ -131,8 +132,12 @@
 </head>
 <body>
   <main class="card">
-    <h1>Barra RNG</h1>
-    <div class="sub">A small personal number tool with transparent generation rules.</div>
+    <h1>Prioriteringsvelger</h1>
+    <div class="sub">Et lite personlig verktøy med transparente regler for valg.</div>
+
+    <div style="text-align:center; margin: 8px 0 18px;">
+      <img src="prioritering.png" alt="Prioritering" style="max-width: 140px; height: auto; border-radius: 12px;">
+    </div>
 
     <div class="row">
       <div>
@@ -195,7 +200,7 @@
     <button id="generateBtn">Generate</button>
 
     <div class="result">
-      <div id="number" class="number">—</div>
+      <div id="number" class="number" style="font-size: 2rem;">—</div>
       <div id="meta" class="meta"></div>
     </div>
 
@@ -226,7 +231,13 @@
     }
 
     function showResult(value, explanation) {
-      numberEl.textContent = String(value);
+      if (value === 0) {
+        numberEl.textContent = 'Hva er prioritering først';
+      } else if (value === 1) {
+        numberEl.textContent = 'Holdninger til prioritering først';
+      } else {
+        numberEl.textContent = String(value);
+      }
       metaEl.textContent = showMetaEl.value === 'yes' ? explanation : '';
     }
 
