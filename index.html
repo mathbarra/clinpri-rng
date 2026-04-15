@@ -5,17 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Q-sortering randomiserer</title>
+  <title>Q-sort randomiserer</title>
   <style>
     :root {
-  --bg: #eef4fb;
-  --card: #ffffff;
-  --text: #0B2466;
-  --muted: #546692;
-  --line: #B4C7E3;
-  --accent: #0B2466;
-  --soft-blue: #8AA8D4;
-}
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --accent: #111827;
+    }
 
     * { box-sizing: border-box; }
 
@@ -128,36 +127,88 @@
     .hidden {
       display: none;
     }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 30px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #cbd5e1;
+      transition: .2s;
+      border-radius: 999px;
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      top: 4px;
+      background: white;
+      transition: .2s;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+
+    input:checked + .slider {
+      background: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <h1>Prioriteringsvelger</h1>
+    <h1>Q-sort randomiserer</h1>
     <div class="sub">Et lite personlig verktøy med transparente regler for valg.</div>
 
     <div style="text-align:center; margin: 8px 0 18px;">
       <img src="prioritering.png" alt="Prioritering" style="max-width: 140px; height: auto; border-radius: 12px;">
     </div>
 
-    <div class="row">
-      <div>
-        <label for="mode">Mode</label>
-        <select id="mode">
-          <option value="clockMod2">Clock mod 2</option>
-          <option value="clockRange">Clock to range</option>
-          <option value="lcg">LCG (deterministic state)</option>
-        </select>
-      </div>
-      <div>
-        <label for="digits">Show explanation</label>
-        <select id="showMeta">
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
+    <div style="display:flex; align-items:center; justify-content:flex-end; margin: 4px 0 16px; gap: 10px;">
+      <label for="detailsToggle" style="margin:0; color: var(--muted);">Details</label>
+      <label class="switch" style="margin:0;">
+        <input id="detailsToggle" type="checkbox">
+        <span class="slider"></span>
+      </label>
     </div>
 
-    <div id="rangeFields" class="row">
+    <div id="detailsSection" class="hidden">
+      <div class="row">
+        <div>
+          <label for="mode">Mode</label>
+          <select id="mode">
+            <option value="clockMod2">Clock mod 2</option>
+            <option value="clockRange">Clock to range</option>
+            <option value="lcg">LCG (deterministic state)</option>
+          </select>
+        </div>
+        <div>
+          <label for="digits">Show explanation</label>
+          <select id="showMeta">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="rangeFields" class="row">
       <div>
         <label for="min">Min</label>
         <input id="min" type="number" value="0">
@@ -197,6 +248,8 @@
       <div class="tiny">Each tap updates the stored state by xₙ₊₁ = (a·xₙ + c) mod m.</div>
     </div>
 
+        </div>
+
     <button id="generateBtn">Generate</button>
 
     <div class="result">
@@ -217,6 +270,12 @@
     const numberEl = document.getElementById('number');
     const metaEl = document.getElementById('meta');
     const showMetaEl = document.getElementById('showMeta');
+    const detailsToggleEl = document.getElementById('detailsToggle');
+    const detailsSectionEl = document.getElementById('detailsSection');
+
+    function updateDetailsVisibility() {
+      detailsSectionEl.classList.toggle('hidden', !detailsToggleEl.checked);
+    }
 
     function updateVisibleFields() {
       const mode = modeEl.value;
@@ -327,8 +386,11 @@
     }
 
     modeEl.addEventListener('change', updateVisibleFields);
+    detailsToggleEl.addEventListener('change', updateDetailsVisibility);
     generateBtn.addEventListener('click', generate);
 
+    detailsToggleEl.checked = false;
+    updateDetailsVisibility();
     updateVisibleFields();
   </script>
 </body>
