@@ -8,13 +8,14 @@
   <title>Q-sort randomiserer</title>
   <style>
     :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #d1d5db;
-      --accent: #111827;
-    }
+  --bg: #eef4fb;
+  --card: #ffffff;
+  --text: #0B2466;
+  --muted: #546692;
+  --line: #B4C7E3;
+  --accent: #0B2466;
+  --soft-blue: #8AA8D4;
+}
 
     * { box-sizing: border-box; }
 
@@ -41,12 +42,14 @@
     h1 {
       margin: 0 0 6px;
       font-size: 1.7rem;
+      text-align: center;
     }
 
     .sub {
       color: var(--muted);
       margin-bottom: 18px;
       line-height: 1.4;
+      text-align: center;
     }
 
     .row {
@@ -291,9 +294,9 @@
 
     function showResult(value, explanation) {
       if (value === 0) {
-        numberEl.textContent = 'Hva er prioritering først';
+        numberEl.textContent = 'Hva er prioritering?\nførst';
       } else if (value === 1) {
-        numberEl.textContent = 'Holdninger til prioritering først';
+        numberEl.textContent = 'Holdninger til prioritering\nførst';
       } else {
         numberEl.textContent = String(value);
       }
